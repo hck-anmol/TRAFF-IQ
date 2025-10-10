@@ -1,0 +1,17 @@
+// client/src/routes.js
+export const routesData = {
+    "hostel_to_airport": {
+      "Route A: Main Road": {
+        "path": [
+          [23.033, 72.540], [23.045, 72.560], [23.070, 72.580]
+        ],
+        "intersections": ["stadium_crossroads", "hanuman_camp_road"]
+      },
+      "Route B: Highway": {
+        "path": [
+          [23.028, 72.510], [23.080, 72.520], [23.150, 72.590]
+        ],
+        "intersections": ["iskcon_crossroads", "vaishnodevi_circle"]
+      }
+    }
+  };
