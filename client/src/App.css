@@ -1,0 +1,19 @@
+/* Update these styles in your App.css */
+.route-planner .action-button, .route-planner .demo-button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.route-planner .action-button {
+    background-color: #007bff; /* Blue for the first button */
+}
+
+.route-planner .demo-button {
+    background-color: #28a745; /* Green for the second button */
+}
