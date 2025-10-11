@@ -10,7 +10,8 @@ import datetime
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Dict, Tuple, List
-
+from pathlib import Path 
+from violation_detector import ViolationDetector
 
 @dataclass
 class Config:
@@ -50,6 +51,14 @@ class Config:
     SERVER_ENDPOINT: str = "http://127.0.0.1:5000/log_traffic_data"
     INTERSECTION_ID: str = "GWL_CROSSING_01" 
 
+    VIOLATION_LOG_PATH: Path = Path("violations")
+    VIOLATION_LINES: Dict[str, Tuple[Tuple[int, int], Tuple[int, int]]] = field(default_factory=lambda: {
+        "NORTH": ((0, 500), (550, 500)),
+        "SOUTH": ((0, 500), (550, 500)),
+        "EAST": ((0, 500), (550, 500)),
+        "WEST": ((0, 500), (550, 500)),
+    })
+
 @dataclass
 class LaneState:
     """Tracks comprehensive state for each lane."""
@@ -71,6 +80,8 @@ class TrafficController:
         self.current_green_lane: str = random.choice(list(self.lanes.keys()))
         self.current_phase: str = 'GREEN'
         self.phase_end_time: float = 0
+        self.violation_detector = ViolationDetector(self.cfg, self.model)
+        print("✅ Traffic Controller Initialized.")
         
         self.pedestrian_request: bool = False
         self.should_quit: bool = False
@@ -215,100 +226,70 @@ class TrafficController:
             
     def run(self):
         print("\n🚀 Starting Traffic Control System"); print("=" * 50)
-        snapshot_frames = self.get_snapshot_data() # Initial snapshot
+        
+        latest_frames = {direction: np.zeros((480, 640, 3), dtype=np.uint8) for direction in self.caps.keys()}
 
         try:
             while not self.should_quit:
                 current_time = time.time()
+                
+                for direction, cap in self.caps.items():
+                    ret, frame = cap.read()
+                    if not ret:
+                        cap.set(cv.CAP_PROP_POS_FRAMES, 0)
+                        continue
+                    latest_frames[direction] = frame
 
-                # --- STATE TRANSITION LOGIC ---
                 if current_time >= self.phase_end_time:
                     if self.current_phase == 'GREEN':
                         self.current_phase = 'YELLOW'
                         self.phase_end_time = current_time + self.cfg.YELLOW_TIME
-                        self.send_to_arduino(f"YELLOW:{self.current_green_lane},TIME:{self.cfg.YELLOW_TIME}")
                         print(f"🟡 Switching {self.current_green_lane} -> YELLOW ({self.cfg.YELLOW_TIME}s)")
-
                     elif self.current_phase == 'YELLOW':
                         self.current_phase = 'ALL_RED'
                         self.phase_end_time = current_time + self.cfg.ALL_RED_TIME
-                        self.send_to_arduino(f"ALLRED,TIME:{self.cfg.ALL_RED_TIME}")
                         print(f"🔴 ALL RED for {self.cfg.ALL_RED_TIME}s")
-
                     elif self.current_phase in ['ALL_RED', 'PEDESTRIAN']:
-                        print("\n" + "=" * 40)
-                        print("📸 Taking intersection snapshot for decision...")
-                        snapshot_frames = self.get_snapshot_data()
+                        print("\n" + "=" * 40 + "\n🚦 Making new traffic decision...")
                         next_lane_dir = self.select_next_lane()
                         
                         if next_lane_dir == "PEDESTRIAN":
                             self.current_phase = 'PEDESTRIAN'
                             self.phase_end_time = current_time + self.cfg.PEDESTRIAN_CROSS_TIME
-                            self.send_to_arduino(f"PEDESTRIAN,TIME:{self.cfg.PEDESTRIAN_CROSS_TIME}")
-                            print(f"🚶 Pedestrian crossing for {self.cfg.PEDESTRIAN_CROSS_TIME}s")
                         else:
                             self.current_green_lane = next_lane_dir
-                            lane_obj = self.lanes[next_lane_dir]
-                            green_time = self.calculate_green_time(lane_obj)
-                            
+                            green_time = self.calculate_green_time(self.lanes[next_lane_dir])
                             self.current_phase = 'GREEN'
                             self.phase_end_time = current_time + green_time
-                            lane_obj.last_green_time = time.time()
-                            lane_obj.waiting_time = 0
-                            
-                            self.send_to_arduino(f"GREEN:{next_lane_dir},TIME:{green_time}")
+                            self.lanes[next_lane_dir].last_green_time = time.time()
+                            self.lanes[next_lane_dir].waiting_time = 0
                             print(f"🟢 GREEN: {next_lane_dir} for {green_time}s")
-
-                            # *** THIS IS THE NEWLY ADDED LINE ***
                             self.log_decision_to_server(next_lane_dir, green_time)
 
-                # --- CONTINUOUS DISPLAY LOGIC ---
                 time_left = max(0, int(self.phase_end_time - current_time))
 
-                # Play the green lane video
-                if self.current_phase == 'GREEN':
-                    green_cap = self.caps[self.current_green_lane]
-                    ret, green_frame = green_cap.read()
-                    if not ret:
-                        green_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                        ret, green_frame = green_cap.read()
-                    if ret:
-                        score, has_ambulance = self.analyze_frame_and_draw_boxes(green_frame)
-                        self.lanes[self.current_green_lane].current_density = score # Update state for consistency
-                        cv2.putText(green_frame, f"{self.current_green_lane} 🟢 GREEN ({time_left}s)", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-                        cv2.putText(green_frame, f"Density: {score:.1f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
-                        cv2.imshow(f"Live Feed - {self.current_green_lane}", green_frame)
-                
-                # Show paused frames for all other lanes
-                for direction, frame in snapshot_frames.items():
-                    lane = self.lanes[direction]
-                    # Update waiting time for display
-                    if direction != self.current_green_lane:
-                        lane.waiting_time = current_time - lane.last_green_time
-
-                    if self.current_phase == 'GREEN' and direction == self.current_green_lane:
-                        continue # Already handled above
-
+                for direction, frame in latest_frames.items():
                     display_frame = frame.copy()
-                    status_text, color = "", (0,0,0)
-                    if self.current_phase == 'YELLOW' and direction == self.current_green_lane:
-                        status_text = f"🟡 YELLOW ({time_left}s)"
-                        color = (0, 255, 255)
-                    else: # All other lanes are red
-                        status_text = f"🔴 RED ({int(lane.waiting_time)}s)"
-                        color = (0, 0, 255)
+                    score, _ = self.analyze_frame_and_draw_boxes(display_frame)
+                    self.lanes[direction].current_density = score
+
+                    is_green = self.current_phase == 'GREEN' and direction == self.current_green_lane
+                    is_yellow = self.current_phase == 'YELLOW' and direction == self.current_green_lane
+                    
+                    if is_green:
+                        status_text, color = f"🟢 GREEN ({time_left}s)", (0, 255, 0)
+                    elif is_yellow:
+                        status_text, color = f"🟡 YELLOW ({time_left}s)", (0, 255, 255)
+                    else: # Lane is RED
+                        self.violation_detector.detect_violations(display_frame, direction)
+                        wait_time = int(current_time - self.lanes[direction].last_green_time)
+                        status_text, color = f"🔴 RED ({wait_time}s)", (0, 0, 255)
                     
                     cv2.putText(display_frame, f"{direction} {status_text}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-                    cv2.putText(display_frame, f"Density: {lane.current_density:.1f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
                     cv2.imshow(f"Live Feed - {direction}", display_frame)
 
-                # Keyboard handler
-                key = cv2.waitKey(1) & 0xFF
-                if key == ord('q'):
+                if cv2.waitKey(1) & 0xFF == ord('q'):
                     self.should_quit = True
-                if key == ord('p'):
-                    self.pedestrian_request = True
-                    print("\n🚶 Pedestrian button pressed!\n")
 
         except KeyboardInterrupt:
             print("\n\n🛑 System stopped by user")

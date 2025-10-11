@@ -5,70 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Traffic Log</title>
     <style>
-        body { font-family: monospace; background-color: #1a1a1a; color: #e0e0e0; margin: 0; padding: 20px; }
-        h1 { color: #4CAF50; }
-        #log-container { display: flex; flex-direction: column; gap: 15px; }
-        .log-entry { background-color: #2c2c2c; border-left: 5px solid #4CAF50; padding: 15px; border-radius: 5px; white-space: pre-wrap; transition: background-color 0.5s; }
-        .log-entry.new { background-color: #3c5c3d; }
-        .lane-info { color: #aaa; }
-        .green { color: #2ecc71; font-weight: bold; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #121212; 
+            color: #e0e0e0; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        h1 { 
+            color: #4CAF50;
+            text-align: center;
+            font-size: 2em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 12px 15px;
+            text-align: center;
+        }
+        thead th {
+            background-color: #4CAF50;
+            color: #ffffff;
+            font-size: 1.1em;
+        }
+        tbody tr {
+            background-color: #2c2c2c;
+            transition: background-color 0.5s ease;
+        }
+        tbody tr:nth-of-type(even) {
+            background-color: #383838;
+        }
+        .new-entry {
+            background-color: #3c5c3d !important;
+        }
+        .emergency {
+            background-color: #6e2a2a !important;
+            border-left: 5px solid #ff4d4d;
+        }
+        .green-lane {
+            color: #4CAF50;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <h1>Live Traffic Log for Intersection: <span id="intersection-id"></span></h1>
-    <div id="log-container">
-        <p>Waiting for data...</p>
-    </div>
+    
+    <table id="log-table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Green Lane (Time)</th>
+                <th>N Density</th>
+                <th>S Density</th>
+                <th>E Density</th>
+                <th>W Density</th>
+            </tr>
+        </thead>
+        <tbody id="log-body">
+            </tbody>
+    </table>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     
     <script>
-        const logContainer = document.getElementById('log-container');
+        const logBody = document.getElementById('log-body');
         const intersectionIdSpan = document.getElementById('intersection-id');
+
         const socket = io();
+
         socket.on('new_data', function(data) {
             console.log('Received new data:', data);
-            addLogEntry(data, true); 
+            addTableRow(data, true);
         });
 
-        function addLogEntry(data, isNew = false) {
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'log-entry';
-
-            const greenLane = data.current_green_lane;
+        function addTableRow(data, isNew = false) {
+            const row = document.createElement('tr');
             
-            let lanesHtml = '';
-            for (const [direction, details] of Object.entries(data.lanes)) {
-                const isGreen = direction === greenLane;
-                const className = isGreen ? 'green' : 'lane-info';
-                lanesHtml += `  <span class="${className}">${direction}: Density=${details.density.toFixed(1)}, Wait=${Math.round(details.wait_time)}s</span>\n`;
+            const isEmergency = Object.values(data.lanes).some(lane => lane.has_ambulance);
+            if (isEmergency) {
+                row.classList.add('emergency');
             }
 
-            entryDiv.innerHTML = `<strong>Timestamp:</strong> ${data.timestamp}\n<strong>GREEN LIGHT: ${greenLane}</strong>\n${lanesHtml}`;
+            const greenLane = data.decision.green_lane;
+            const greenTime = data.decision.green_time;
+
+            const lanes = ['NORTH', 'SOUTH', 'EAST', 'WEST'];
+            let cellsHtml = '';
+
+            // MODIFIED: This loop now only adds the density to each cell
+            lanes.forEach(direction => {
+                const lane = data.lanes[direction];
+                const density = lane.density.toFixed(1);
+                cellsHtml += `<td>${density}</td>`;
+            });
             
-            logContainer.prepend(entryDiv);
+            const timestamp = new Date(data.timestamp).toLocaleString();
+            
+            // MODIFIED: The green lane cell now also displays the green time
+            const greenTimeDisplay = (typeof greenTime === 'number' || !isNaN(greenTime)) 
+                ? `(${greenTime}s)` 
+                : `(${greenTime})`;
+
+            row.innerHTML = `
+                <td>${timestamp}</td>
+                <td class="green-lane">${greenLane} ${greenTimeDisplay}</td>
+                ${cellsHtml}
+            `;
+            
+            logBody.prepend(row);
             
             if (isNew) {
-                entryDiv.classList.add('new');
+                row.classList.add('new-entry');
                 setTimeout(() => {
-                    entryDiv.classList.remove('new');
-                }, 1000);
+                    row.classList.remove('new-entry');
+                }, 1500);
             }
         }
         
         async function fetchHistory() {
             try {
                 const response = await fetch('/get_all_data');
+                if (!response.ok) {
+                    logBody.innerHTML = '<tr><td colspan="6">Could not load historical data. Server responded with an error.</td></tr>';
+                    return;
+                }
                 const history = await response.json();
                 
                 if (history && history.length > 0) {
-                    logContainer.innerHTML = ''; 
+                    logBody.innerHTML = ''; 
                     intersectionIdSpan.textContent = history[0].intersection_id;
-                    history.forEach(log => addLogEntry(log));
+                    history.forEach(log => addTableRow(log));
+                } else {
+                     logBody.innerHTML = '<tr><td colspan="6">Waiting for data...</td></tr>';
                 }
             } catch (error) {
                 console.error("Failed to fetch history:", error);
-                logContainer.innerHTML = '<p>Could not load historical data.</p>';
+                logBody.innerHTML = '<tr><td colspan="6">Could not load historical data. Is the server running?</td></tr>';
             }
         }
 

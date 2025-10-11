@@ -17,24 +17,29 @@ LOG_FILE = 'traffic_data_log.csv'
 CSV_HEADER = [
     'timestamp', 'intersection_id', 'green_lane', 'green_time', 
     'north_density', 'south_density', 'east_density', 'west_density',
-    'north_wait_time', 'south_wait_time', 'east_wait_time', 'west_wait_time'
+    'north_has_ambulance', 'south_has_ambulance', 'east_has_ambulance', 'west_has_ambulance'
 ]
 
 def format_row_to_json(row):
-    """Converts a CSV row (dict) into our desired JSON structure."""
+    """Converts a CSV row (dict) into our desired JSON structure for historical data."""
+    def to_float(value):
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return 0.0
+
     return {
-        "timestamp": row["timestamp"],
-        "intersection_id": row["intersection_id"],
-        "current_green_lane": row["green_lane"],
+        "timestamp": row.get("timestamp", ""),
+        "intersection_id": row.get("intersection_id", ""),
+        "decision": {"green_lane": row.get("green_lane", ""), "green_time": row.get("green_time", "")},
         "lanes": {
-            "NORTH": {"density": float(row["north_density"]), "wait_time": float(row["north_wait_time"])},
-            "SOUTH": {"density": float(row["south_density"]), "wait_time": float(row["south_wait_time"])},
-            "EAST": {"density": float(row["east_density"]), "wait_time": float(row["east_wait_time"])},
-            "WEST": {"density": float(row["west_density"]), "wait_time": float(row["west_wait_time"])},
+            "NORTH": {"density": to_float(row.get("north_density")), "has_ambulance": row.get("north_has_ambulance") == 'True'},
+            "SOUTH": {"density": to_float(row.get("south_density")), "has_ambulance": row.get("south_has_ambulance") == 'True'},
+            "EAST": {"density": to_float(row.get("east_density")), "has_ambulance": row.get("east_has_ambulance") == 'True'},
+            "WEST": {"density": to_float(row.get("west_density")), "has_ambulance": row.get("west_has_ambulance") == 'True'},
         }
     }
 
-# Ensure the log file exists with a header
 if not os.path.exists(LOG_FILE):
     with open(LOG_FILE, 'w', newline='') as f:
         writer = csv.writer(f)
@@ -54,7 +59,6 @@ def get_all_data():
             reader = csv.DictReader(f)
             for row in reader:
                 all_data.append(format_row_to_json(row))
-        # Return data in reverse chronological order (newest first)
         return jsonify(list(reversed(all_data)))
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -64,24 +68,39 @@ def log_traffic_data():
     """Receives data from a traffic controller, logs it, and broadcasts it."""
     try:
         data = request.get_json()
+        
         row_to_write = [
-            data['timestamp'], data['intersection_id'], data['decision']['green_lane'],
-            data['decision']['green_time'], data['lane_states']['NORTH']['density'],
-            data['lane_states']['SOUTH']['density'], data['lane_states']['EAST']['density'],
-            data['lane_states']['WEST']['density'], data['lane_states']['NORTH']['waiting_time'],
-            data['lane_states']['SOUTH']['waiting_time'], data['lane_states']['EAST']['waiting_time'],
-            data['lane_states']['WEST']['waiting_time']
+            data.get('timestamp'), data.get('intersection_id'),
+            data.get('decision', {}).get('green_lane'), data.get('decision', {}).get('green_time'),
+            data.get('lane_states', {}).get('NORTH', {}).get('density', 0),
+            data.get('lane_states', {}).get('SOUTH', {}).get('density', 0),
+            data.get('lane_states', {}).get('EAST', {}).get('density', 0),
+            data.get('lane_states', {}).get('WEST', {}).get('density', 0),
+            data.get('lane_states', {}).get('NORTH', {}).get('has_ambulance', False),
+            data.get('lane_states', {}).get('SOUTH', {}).get('has_ambulance', False),
+            data.get('lane_states', {}).get('EAST', {}).get('has_ambulance', False),
+            data.get('lane_states', {}).get('WEST', {}).get('has_ambulance', False)
         ]
         with open(LOG_FILE, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(row_to_write)
         
-        print(f"✅ Logged and Broadcasting: {data['intersection_id']} at {data['timestamp']}")
+        frontend_data = {
+            "timestamp": data.get('timestamp'),
+            "intersection_id": data.get('intersection_id'),
+            "decision": data.get('decision', {}),
+            "lanes": {}
+        }
+        if 'lane_states' in data:
+            for direction, lane_data in data['lane_states'].items():
+                frontend_data['lanes'][direction] = {
+                    "density": lane_data.get('density', 0),
+                    "has_ambulance": lane_data.get('has_ambulance', False)
+                }
+
+        print(f"✅ Logged and Broadcasting: {data.get('intersection_id')} at {data.get('timestamp')}")
         
-        # --- This is the MAGIC part ---
-        # Format the data and emit it to all connected clients
-        formatted_data = format_row_to_json(csv.DictReader([','.join(map(str, row_to_write))], fieldnames=CSV_HEADER).__next__())
-        socketio.emit('new_data', formatted_data)
+        socketio.emit('new_data', frontend_data)
         
         return jsonify({"status": "success"}), 200
 
@@ -89,8 +108,6 @@ def log_traffic_data():
         print(f"❌ Error processing request: {e}")
         return jsonify({"status": "error", "message": str(e)}), 400
 
-# --- Main execution ---
 if __name__ == '__main__':
     print("🚀 Starting Flask-SocketIO server...")
-    # Use socketio.run() instead of app.run() and use eventlet
     socketio.run(app, host='0.0.0.0', port=5000)
