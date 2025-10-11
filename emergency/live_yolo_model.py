@@ -3,7 +3,7 @@ import json
 from ultralytics import YOLO
 import time
 import sys
-import argparse # 1. Import the library
+import argparse
 
 # --- CONFIGURATION ---
 MODEL_PATH = "../emergency/best.pt" 
@@ -22,7 +22,6 @@ def analyze_video_with_preview(video_path):
         sys.exit(1)
 
     try:
-        # Use the video_path parameter here
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             print(f"Error: Could not open video file at {video_path}", file=sys.stderr)
@@ -62,7 +61,7 @@ def analyze_video_with_preview(video_path):
 
     final_report = {
         "model_path": MODEL_PATH,
-        "video_path": video_path, # Use the parameter here
+        "video_path": video_path,
         "confidence_threshold": CONFIDENCE_THRESHOLD,
         "processing_time_seconds": round(processing_time, 2),
         "avg_fps": round(fps, 2),
