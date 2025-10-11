@@ -1,258 +1,173 @@
-/* New styles for a consistent, modern UI */
-.route-planner {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    width: 320px;
-    
-    /* Core styles from the intersection panel */
-    background-color: rgba(20, 20, 25, 0.9);
-    color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    
-    padding: 20px;
-    transition: all 0.3s ease-in-out;
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    overflow: hidden;
+    background-color: #f0f2f5; /* Light gray background */
 }
 
-.route-planner h2 {
-    margin-top: 0;
-    text-align: center;
-    font-weight: 500;
-    color: white; /* Text color for dark background */
-}
-
-.route-planner .message {
-    text-align: center;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.3); /* Darker background for message */
-    border-radius: 5px;
-    margin-bottom: 15px;
-    color: #ced4da; /* Lighter text for readability */
-    font-size: 0.9em;
-}
-
-/* Button styles remain the same but will look great on the new dark background */
-/* Final Draggable Panel Styles */
-.route-planner {
-    position: absolute;
-    z-index: 1000;
-    
-    /* Shared styles for both states */
-    background-color: rgba(20, 20, 25, 0.9);
-    color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    padding: 25px;
-    
-    /* This makes the animation smooth */
-    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/* The initial, centered, and larger state */
-/* Final Draggable & Animated Panel Styles */
-.route-planner {
-    position: absolute;
-    z-index: 1000;
-    
-    /* Shared styles for both states */
-    background-color: rgba(20, 20, 25, 0.9);
-    color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    padding: 25px;
-    
-    /* This makes the animation smooth! */
-    transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/* The initial, centered, and larger state */
-.route-planner.initial {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    text-align: center;
-}
-
-/* The final, docked, and smaller state */
-.route-planner.docked {
-    top: 20px;
-    left: 20px;
-    transform: none;
-    width: 320px;
-}
-
-.drag-handle {
-    cursor: grab;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.drag-handle:active {
-    cursor: grabbing;
-}
-
-.route-planner h2 {
-    margin-top: 0;
-    text-align: center;
-    font-weight: 500;
-    color: white;
-}
-
-.route-planner .message {
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
-    margin-bottom: 15px;
-    color: #ced4da;
-    font-size: 0.9em;
-}
-
-.route-planner .initial-button {
-    font-size: 1.2em !important;
-    padding: 15px !important;
-}
-.intersection-panel {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    background-color: rgba(29, 29, 29, 0.85);
-    color: white;
-    padding: 15px 25px;
-    border-radius: 12px;
-    text-align: center;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    width: 450px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-}
-
-.intersection-panel h3 {
-    margin: 0 0 15px 0;
-    font-size: 1.2em;
-    font-weight: 500;
-}
-
-.density-display {
-    display: flex;
-    justify-content: space-around;
-    background: rgba(0,0,0,0.3);
-    padding: 8px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-}
-.density-display p { margin: 0; font-weight: bold; }
-
-.signal-status {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.signal-status .light {
-    font-size: 1.1em;
-    font-weight: bold;
-    padding: 10px 15px;
-    border-radius: 8px;
-    transition: background-color 0.3s;
-}
-.signal-status .light.green { background-color: #28a745; }
-.signal-status .light.red { background-color: #dc3545; }
-
-.signal-status .timer {
-    font-size: 2.5em;
-    font-weight: bold;
-}
-
-.intersection-panel {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    width: 500px;
-    background-color: rgba(20, 20, 25, 0.9);
-    color: white;
-    padding: 15px 25px;
-    border-radius: 12px;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-}
-
-.intersection-panel h3 {
-    margin: 0 0 15px 0;
-}
-
-.display-grid {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.light-column, .timer-column {
+.app-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    height: 100vh;
+    width: 100vw;
 }
 
-.light-column h4 {
-    margin: 0 0 10px 0;
-    font-size: 1em;
-    font-weight: 400;
-    color: #adb5bd;
-}
-
-.timer-column .timer {
-    font-size: 4em;
-    font-weight: bold;
-}
-
-.timer-column .status-message {
-    margin: 5px 0 0 0;
-    font-size: 0.9em;
-    color: #ced4da;
-    min-height: 1.2em;
-}
-
-/* Traffic Light Styles */
-.traffic-light {
-    background: #212529;
-    padding: 10px;
-    border-radius: 25px;
+.main-content {
     display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative; /* Important for absolute positioning of sidebar in fullscreen */
+}
+
+/* --- Header --- */
+.header-container {
+    flex-shrink: 0;
+    transition: all 0.5s ease-in-out;
+}
+
+.app-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 15px 25px;
+    background-color: #24292e; /* Dark header */
+    color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1001;
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: 600;
+}
+
+/* IMPROVED: Full Screen Button Style */
+
+.toggle-view-btn{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1001; /* Must be on top of everything */
+    
+    display: flex;
+    align-items: center;
     gap: 8px;
+    
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    
+    background-color:#007bff;
+    color: white; /* Dark, semi-transparent */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease-in-out;
 }
 
-.light-circle {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: #495057;
-    opacity: 0.3;
-    transition: all 0.3s;
+.toggle-view-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
 }
 
-.light-circle.active.red { background-color: #ff4d4d; opacity: 1; box-shadow: 0 0 15px #ff4d4d; }
-.light-circle.active.yellow { background-color: #ffc107; opacity: 1; box-shadow: 0 0 15px #ffc107; }
-.light-circle.active.green { background-color: #44b782; opacity: 1; box-shadow: 0 0 15px #44b782; }
+/* --- Dashboard View --- */
+.dashboard-view .sidebar {
+    width: 400px;
+    padding: 20px;
+    background-color: #2c3d4c;
+    border-right: 1px solid #dee2e6;
+    flex-shrink: 0;
+}
+
+.dashboard-view .route-planner {
+    /* Styles for the panel when docked in the sidebar */
+    position: relative;
+    background-color: white;
+    color: #212529;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.dashboard-view .drag-handle { cursor: default; }
+
+.dashboard-view .route-planner .message {
+    background-color: #f0f0f0;
+    color: #555;
+}
+
+/* IMPROVED: Map Padding */
+.dashboard-view .map-wrapper {
+    flex-grow: 1;
+/* padding: 20px; Adds space around the map */
+}
+
+.dashboard-view .leaflet-container {
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* --- Full Screen View --- */
+.fullscreen-view .header-container {
+    height: 0;
+    overflow: hidden;
+}
+
+.fullscreen-view .sidebar {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: auto;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.fullscreen-view .route-planner {
+    background-color: rgba(20, 20, 25, 0.9);
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 25px;
+    width: 320px;
+}
+
+.fullscreen-view .drag-handle { cursor: grab; }
+.fullscreen-view .drag-handle:active { cursor: grabbing; }
+
+.fullscreen-view .route-planner .message {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: #ced4da;
+}
+
+/* --- Shared Panel & Button Styles --- */
+.route-planner h2 {
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+.fullscreen-view .route-planner h2 { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.dashboard-view .route-planner h2 { border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
 
 
-/* --- Polished Button Styles --- */
-.route-planner .action-button,
-.route-planner .demo-button {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.route-planner .message {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+.action-button, .demo-button {
     font-size: 16px;
     font-weight: 600;
     color: white;
@@ -262,36 +177,97 @@
     width: 100%;
     margin-bottom: 10px;
     cursor: pointer;
-    outline: none;
-    
-    /* Smooth transition for hover and active states */
     transition: all 0.2s ease-in-out;
-    
-    /* Add a subtle shadow for depth */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+.action-button { background-image: linear-gradient(to right, #007bff, #0056b3); }
+.demo-button { background-image: linear-gradient(to right, #28a745, #1e7e34); }
+button:active { transform: translateY(2px); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15); }
+button:disabled { background-image: none; background-color: #6c757d; cursor: not-allowed; transform: none; box-shadow: none; }
 
-/* Style for the first button */
-.route-planner .action-button {
-    background-image: linear-gradient(to right, #007bff, #0056b3);
+/* --- Intersection Panel Styles --- */
+.intersection-panel {
+position: absolute;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+z-index: 1000;
+width: 500px;
+background-color: rgba(20, 20, 25, 0.9);
+color: white;
+padding: 15px 25px;
+border-radius: 12px;
+text-align: center;
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.2);
+box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-/* Style for the second button */
-.route-planner .demo-button {
-    background-image: linear-gradient(to right, #28a745, #1e7e34);
+/* ... (The rest of your intersection panel and traffic light styles can be pasted here without changes) ... */
+
+.intersection-panel.emergency-active {
+border-color: #ffc107;
+box-shadow: 0 0 25px rgba(255, 193, 7, 0.6);
 }
 
-/* Make the button look like it's being pressed down */
-.route-planner button:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+.emergency-alert {
+background-color: #dc3545;
+color: white;
+padding: 8px;
+font-weight: bold;
+text-align: center;
+border-radius: 8px 8px 0 0;
+margin: -15px -25px 15px -25px;
+animation: blink 1.5s linear infinite;
 }
 
-/* Style for a disabled button */
-.route-planner button:disabled {
-    background-image: none;
-    background-color: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+@keyframes blink {
+50% { opacity: 0.7; }
+}
+
+.display-grid { display: flex; justify-content: space-between; align-items: center; }
+.light-column, .timer-column { display: flex; flex-direction: column; align-items: center; }
+.light-column h4 { margin: 0 0 10px 0; font-size: 1em; font-weight: 400; color: #adb5bd; }
+.timer-column .timer { font-size: 4em; font-weight: bold; }
+.timer-column .status-message { margin: 5px 0 0 0; font-size: 0.9em; color: #ced4da; min-height: 1.2em; }
+.traffic-light { background: #212529; padding: 10px; border-radius: 25px; display: flex; gap: 8px; }
+.light-circle { width: 30px; height: 30px; border-radius: 50%; background-color: #495057; opacity: 0.3; transition: all 0.3s; }
+.light-circle.active.red { background-color: #ff4d4d; opacity: 1; box-shadow: 0 0 15px #ff4d4d; }
+.light-circle.active.yellow { background-color: #ffc107; opacity: 1; box-shadow: 0 0 15px #ffc107; }
+.light-circle.active.green { background-color: #44b782; opacity: 1; box-shadow: 0 0 15px #44b782; }
+
+/* --- Exit Full Screen Button --- */
+.exit-fullscreen-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1001; /* Must be on top of everything */
+    
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    
+    background-color: rgba(33, 37, 41, 0.85); /* Dark, semi-transparent */
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease-in-out;
+}
+
+.exit-fullscreen-btn:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.exit-fullscreen-btn svg {
+    stroke: white;
 }
