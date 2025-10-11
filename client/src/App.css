@@ -1,3 +1,126 @@
+/* New styles for a consistent, modern UI */
+.route-planner {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 320px;
+    
+    /* Core styles from the intersection panel */
+    background-color: rgba(20, 20, 25, 0.9);
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    
+    padding: 20px;
+    transition: all 0.3s ease-in-out;
+}
+
+.route-planner h2 {
+    margin-top: 0;
+    text-align: center;
+    font-weight: 500;
+    color: white; /* Text color for dark background */
+}
+
+.route-planner .message {
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.3); /* Darker background for message */
+    border-radius: 5px;
+    margin-bottom: 15px;
+    color: #ced4da; /* Lighter text for readability */
+    font-size: 0.9em;
+}
+
+/* Button styles remain the same but will look great on the new dark background */
+/* Final Draggable Panel Styles */
+.route-planner {
+    position: absolute;
+    z-index: 1000;
+    
+    /* Shared styles for both states */
+    background-color: rgba(20, 20, 25, 0.9);
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 25px;
+    
+    /* This makes the animation smooth */
+    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* The initial, centered, and larger state */
+/* Final Draggable & Animated Panel Styles */
+.route-planner {
+    position: absolute;
+    z-index: 1000;
+    
+    /* Shared styles for both states */
+    background-color: rgba(20, 20, 25, 0.9);
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 25px;
+    
+    /* This makes the animation smooth! */
+    transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* The initial, centered, and larger state */
+.route-planner.initial {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    text-align: center;
+}
+
+/* The final, docked, and smaller state */
+.route-planner.docked {
+    top: 20px;
+    left: 20px;
+    transform: none;
+    width: 320px;
+}
+
+.drag-handle {
+    cursor: grab;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.route-planner h2 {
+    margin-top: 0;
+    text-align: center;
+    font-weight: 500;
+    color: white;
+}
+
+.route-planner .message {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    margin-bottom: 15px;
+    color: #ced4da;
+    font-size: 0.9em;
+}
+
+.route-planner .initial-button {
+    font-size: 1.2em !important;
+    padding: 15px !important;
+}
 .intersection-panel {
     position: absolute;
     bottom: 20px;
@@ -49,4 +172,126 @@
 .signal-status .timer {
     font-size: 2.5em;
     font-weight: bold;
+}
+
+.intersection-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 500px;
+    background-color: rgba(20, 20, 25, 0.9);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.intersection-panel h3 {
+    margin: 0 0 15px 0;
+}
+
+.display-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.light-column, .timer-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.light-column h4 {
+    margin: 0 0 10px 0;
+    font-size: 1em;
+    font-weight: 400;
+    color: #adb5bd;
+}
+
+.timer-column .timer {
+    font-size: 4em;
+    font-weight: bold;
+}
+
+.timer-column .status-message {
+    margin: 5px 0 0 0;
+    font-size: 0.9em;
+    color: #ced4da;
+    min-height: 1.2em;
+}
+
+/* Traffic Light Styles */
+.traffic-light {
+    background: #212529;
+    padding: 10px;
+    border-radius: 25px;
+    display: flex;
+    gap: 8px;
+}
+
+.light-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #495057;
+    opacity: 0.3;
+    transition: all 0.3s;
+}
+
+.light-circle.active.red { background-color: #ff4d4d; opacity: 1; box-shadow: 0 0 15px #ff4d4d; }
+.light-circle.active.yellow { background-color: #ffc107; opacity: 1; box-shadow: 0 0 15px #ffc107; }
+.light-circle.active.green { background-color: #44b782; opacity: 1; box-shadow: 0 0 15px #44b782; }
+
+
+/* --- Polished Button Styles --- */
+.route-planner .action-button,
+.route-planner .demo-button {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    margin-bottom: 10px;
+    cursor: pointer;
+    outline: none;
+    
+    /* Smooth transition for hover and active states */
+    transition: all 0.2s ease-in-out;
+    
+    /* Add a subtle shadow for depth */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the first button */
+.route-planner .action-button {
+    background-image: linear-gradient(to right, #007bff, #0056b3);
+}
+
+/* Style for the second button */
+.route-planner .demo-button {
+    background-image: linear-gradient(to right, #28a745, #1e7e34);
+}
+
+/* Make the button look like it's being pressed down */
+.route-planner button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Style for a disabled button */
+.route-planner button:disabled {
+    background-image: none;
+    background-color: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
