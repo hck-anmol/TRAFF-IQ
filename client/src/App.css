@@ -1,273 +1,288 @@
+/* Theme: Google Maps Inspired - Subtle & Elegant
+  Description: A clean, modern theme inspired by Google Maps and the user-provided webpage design.
+  Key features: Light color palette, soft shadows, purple/blue accent colors, and improved readability.
+*/
+
 body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    overflow: hidden;
-    background-color: #f0f2f5; /* Light gray background */
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  
+  overflow: hidden;
+  background-color: #f8f9fa; /* Lighter, cleaner background */
 }
 
 .app-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100vw;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
 }
 
 .main-content {
-    display: flex;
-    flex-grow: 1;
-    overflow: hidden;
-    position: relative; /* Important for absolute positioning of sidebar in fullscreen */
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
 }
 
 /* --- Header --- */
 .header-container {
-    flex-shrink: 0;
-    transition: all 0.5s ease-in-out;
+  flex-shrink: 0;
+  transition: all 0.5s ease-in-out;
 }
 
 .app-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    padding: 15px 25px;
-    background-color: #24292e; /* Dark header */
-    color: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    z-index: 1001;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 15px 25px;
+  margin-bottom: 10px;
+  background-color: #ffffff; /* Clean white header */
+  color: #202124; /* Dark text for contrast */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  z-index: 1001;
 }
 
 .app-header h1 {
-    margin: 0;
-    font-size: 2em;
-    font-weight: 600;
+  margin: 0;
+  font-size: 1.8em; /* Slightly smaller for elegance */
+  font-weight: 500;
 }
 
-/* IMPROVED: Full Screen Button Style */
-
-.toggle-view-btn{
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1001; /* Must be on top of everything */
-    
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    
-    padding: 10px 18px;
-    font-size: 14px;
-    font-weight: 600;
-    
-    background-color:#007bff;
-    color: white; /* Dark, semi-transparent */
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    cursor: pointer;
-    
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease-in-out;
+/* --- View Toggle Button --- */
+.toggle-view-btn {
+  position: absolute;
+  top: 18px;
+  right: 25px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  background-color:#7b68ee;
+  color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
 }
 
 .toggle-view-btn:hover {
-    background-color: #0056b3;
-    transform: translateY(-1px);
+  background-color: #7b68ee;
+  border-color: #dadce0;
 }
 
 /* --- Dashboard View --- */
 .dashboard-view .sidebar {
-    width: 400px;
-    padding: 20px;
-    background-color: #2c3d4c;
-    border-right: 1px solid #dee2e6;
-    flex-shrink: 0;
+  width: 400px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .dashboard-view .route-planner {
-    /* Styles for the panel when docked in the sidebar */
-    position: relative;
-    background-color: white;
-    color: #212529;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    border: 1px solid rgba(0,0,0,0.05);
+  position: relative;
+  background-color: #f8f9fa; /* Slightly off-white panel */
+  color: #202124;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
 }
 
 .dashboard-view .drag-handle { cursor: default; }
 
 .dashboard-view .route-planner .message {
-    background-color: #f0f0f0;
-    color: #555;
+  background-color: #e8eaf6; /* Light indigo message box */
+  color: #3f51b5;
 }
 
-/* IMPROVED: Map Padding */
 .dashboard-view .map-wrapper {
-    flex-grow: 1;
-/* padding: 20px; Adds space around the map */
+  flex-grow: 1;
+  padding: 20px; /* Add space around the map */
 }
 
 .dashboard-view .leaflet-container {
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* --- Full Screen View --- */
 .fullscreen-view .header-container {
-    height: 0;
-    overflow: hidden;
+  height: 0;
+  overflow: hidden;
 }
 
 .fullscreen-view .sidebar {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    width: auto;
-    padding: 0;
-    background: none;
-    border: none;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  width: auto;
+  padding: 0;
+  background: none;
+  border: none;
 }
 
+/* Card style from the image */
 .fullscreen-view .route-planner {
-    background-color: rgba(20, 20, 25, 0.9);
-    color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    padding: 25px;
-    width: 320px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #202124;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 25px;
+  width: 340px;
 }
 
 .fullscreen-view .drag-handle { cursor: grab; }
 .fullscreen-view .drag-handle:active { cursor: grabbing; }
 
 .fullscreen-view .route-planner .message {
-    background-color: rgba(0, 0, 0, 0.3);
-    color: #ced4da;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #3c4043;
 }
 
 /* --- Shared Panel & Button Styles --- */
 .route-planner h2 {
-    margin: 0 0 15px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  text-align: center;
+  font-weight: 500;
 }
-.fullscreen-view .route-planner h2 { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+
+.fullscreen-view .route-planner h2 { border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
 .dashboard-view .route-planner h2 { border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
 
-
 .route-planner .message {
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    font-size: 0.9em;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 0.9em;
+  border: 1px solid transparent;
+}
+.dashboard-view .route-planner .message {
+    border-color: #c5cae9;
 }
 
+
+/* Inspired by the 'Try a Demo' button */
 .action-button, .demo-button {
-    font-size: 16px;
-    font-weight: 600;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    width: 100%;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
+  width: 100%;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 10px rgba(120, 90, 240, 0.2);
 }
-.action-button { background-image: linear-gradient(to right, #007bff, #0056b3); }
-.demo-button { background-image: linear-gradient(to right, #28a745, #1e7e34); }
-button:active { transform: translateY(2px); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15); }
-button:disabled { background-image: none; background-color: #6c757d; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.action-button { background-image: linear-gradient(to right, #7b68ee, #5d4ae0); }
+.demo-button { background-image: linear-gradient(90deg,  #667eea , #593a79 ); }
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(120, 90, 240, 0.3);
+}
+
+button:active { 
+  transform: translateY(1px); 
+  box-shadow: 0 2px 5px rgba(120, 90, 240, 0.2); 
+}
+
+button:disabled { 
+  background-image: none; 
+  background-color: #adb5bd; 
+  cursor: not-allowed; 
+  transform: none; 
+  box-shadow: none; 
+}
 
 /* --- Intersection Panel Styles --- */
 .intersection-panel {
-position: absolute;
-bottom: 20px;
-left: 50%;
-transform: translateX(-50%);
-z-index: 1000;
-width: 500px;
-background-color: rgba(20, 20, 25, 0.9);
-color: white;
-padding: 15px 25px;
-border-radius: 12px;
-text-align: center;
-backdrop-filter: blur(10px);
-border: 1px solid rgba(255, 255, 255, 0.2);
-box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 500px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #202124;
+  padding: 15px 25px;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* ... (The rest of your intersection panel and traffic light styles can be pasted here without changes) ... */
-
 .intersection-panel.emergency-active {
-border-color: #ffc107;
-box-shadow: 0 0 25px rgba(255, 193, 7, 0.6);
+  border-color: #fdd835;
+  box-shadow: 0 0 25px rgba(253, 216, 53, 0.6);
 }
 
 .emergency-alert {
-background-color: #dc3545;
-color: white;
-padding: 8px;
-font-weight: bold;
-text-align: center;
-border-radius: 8px 8px 0 0;
-margin: -15px -25px 15px -25px;
-animation: blink 1.5s linear infinite;
+  background-color: #d32f2f;
+  color: white;
+  padding: 8px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 8px 8px 0 0;
+  margin: -15px -25px 15px -25px;
+  animation: blink 1.5s linear infinite;
 }
 
 @keyframes blink {
-50% { opacity: 0.7; }
+  50% { opacity: 0.8; }
 }
 
 .display-grid { display: flex; justify-content: space-between; align-items: center; }
 .light-column, .timer-column { display: flex; flex-direction: column; align-items: center; }
-.light-column h4 { margin: 0 0 10px 0; font-size: 1em; font-weight: 400; color: #adb5bd; }
-.timer-column .timer { font-size: 4em; font-weight: bold; }
-.timer-column .status-message { margin: 5px 0 0 0; font-size: 0.9em; color: #ced4da; min-height: 1.2em; }
-.traffic-light { background: #212529; padding: 10px; border-radius: 25px; display: flex; gap: 8px; }
-.light-circle { width: 30px; height: 30px; border-radius: 50%; background-color: #495057; opacity: 0.3; transition: all 0.3s; }
-.light-circle.active.red { background-color: #ff4d4d; opacity: 1; box-shadow: 0 0 15px #ff4d4d; }
-.light-circle.active.yellow { background-color: #ffc107; opacity: 1; box-shadow: 0 0 15px #ffc107; }
-.light-circle.active.green { background-color: #44b782; opacity: 1; box-shadow: 0 0 15px #44b782; }
+.light-column h4 { margin: 0 0 10px 0; font-size: 1em; font-weight: 400; color: #5f6368; }
+.timer-column .timer { font-size: 4em; font-weight: 500; color: #202124; }
+.timer-column .status-message { margin: 5px 0 0 0; font-size: 0.9em; color: #5f6368; min-height: 1.2em; }
+.traffic-light { background: #e8eaed; padding: 10px; border-radius: 25px; display: flex; gap: 8px; border: 1px solid #dadce0;}
+.light-circle { width: 30px; height: 30px; border-radius: 50%; background-color: #bdc1c6; opacity: 0.5; transition: all 0.3s; }
+.light-circle.active.red { background-color: #ea4335; opacity: 1; box-shadow: 0 0 15px #ea4335; }
+.light-circle.active.yellow { background-color: #fbbc05; opacity: 1; box-shadow: 0 0 15px #fbbc05; }
+.light-circle.active.green { background-color: #34a853; opacity: 1; box-shadow: 0 0 15px #34a853; }
 
-/* --- Exit Full Screen Button --- */
+/* --- Exit Full Screen Button (matches Toggle Button) --- */
 .exit-fullscreen-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1001; /* Must be on top of everything */
-    
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    
-    padding: 10px 18px;
-    font-size: 14px;
-    font-weight: 600;
-    
-    background-color: rgba(33, 37, 41, 0.85); /* Dark, semi-transparent */
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    cursor: pointer;
-    
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease-in-out;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: rgba(60, 64, 67, 0.9);
+  color: white;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
 }
 
 .exit-fullscreen-btn:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+  background-color: rgba(32, 33, 36, 0.95);
+  transform: translateY(-2px);
 }
 
 .exit-fullscreen-btn svg {
-    stroke: white;
+  stroke: white;
 }
