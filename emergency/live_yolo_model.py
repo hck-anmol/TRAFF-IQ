@@ -3,14 +3,16 @@ import json
 from ultralytics import YOLO
 import time
 import sys
+import argparse # 1. Import the library
 
-MODEL_PATH = "best.pt" 
-VIDEO_PATH = "test_video.mp4"
-# ADD THIS LINE: Set a confidence threshold (e.g., 90%)
+# --- CONFIGURATION ---
+MODEL_PATH = "../emergency/best.pt" 
+# VIDEO_PATH has been removed from here
 CONFIDENCE_THRESHOLD = 0.9 
-# ---------------------------------------------------
+# --------------------
 
-def analyze_video_with_preview():
+# 2. The function now accepts video_path as a parameter
+def analyze_video_with_preview(video_path):
     start_time = time.time()
     
     try:
@@ -20,9 +22,10 @@ def analyze_video_with_preview():
         sys.exit(1)
 
     try:
-        cap = cv2.VideoCapture(VIDEO_PATH)
+        # Use the video_path parameter here
+        cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
-            print(f"Error: Could not open video file at {VIDEO_PATH}", file=sys.stderr)
+            print(f"Error: Could not open video file at {video_path}", file=sys.stderr)
             sys.exit(1)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     except Exception as e:
@@ -37,14 +40,12 @@ def analyze_video_with_preview():
         if not success:
             break
 
-        # Pass the confidence threshold to the model
         results = model(frame, conf=CONFIDENCE_THRESHOLD)
         
         annotated_frame = results[0].plot()
         cv2.imshow("YOLOv8 Live Detection", annotated_frame)
 
         if not final_emergency_detected:
-            # The results are now pre-filtered by confidence, so we just check what's left
             detected_names = {model.names[int(cls)] for cls in results[0].boxes.cls}
             if not emergency_classes.isdisjoint(detected_names):
                 final_emergency_detected = True
@@ -61,7 +62,7 @@ def analyze_video_with_preview():
 
     final_report = {
         "model_path": MODEL_PATH,
-        "video_path": VIDEO_PATH,
+        "video_path": video_path, # Use the parameter here
         "confidence_threshold": CONFIDENCE_THRESHOLD,
         "processing_time_seconds": round(processing_time, 2),
         "avg_fps": round(fps, 2),
@@ -70,5 +71,19 @@ def analyze_video_with_preview():
     
     print(json.dumps(final_report, indent=4))
 
+# 3. New main function to handle terminal arguments
+def main():
+    # Create a parser object
+    parser = argparse.ArgumentParser(description="Live emergency vehicle detection in a video file.")
+    
+    # Add an argument for the video file path
+    parser.add_argument("video_path", help="Path to the video file to be analyzed.")
+    
+    # Parse the arguments provided in the terminal
+    args = parser.parse_args()
+    
+    # Call the analysis function with the video path from the terminal
+    analyze_video_with_preview(args.video_path)
+
 if __name__ == "__main__":
-    analyze_video_with_preview()
+    main()
