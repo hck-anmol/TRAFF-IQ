@@ -2,6 +2,8 @@ from ultralytics import YOLO
 import cv2
 import serial
 import time
+import requests
+import json 
 import random
 import numpy as np
 import datetime
@@ -12,7 +14,8 @@ from typing import Dict, Tuple, List
 
 @dataclass
 class Config:
-    SIMULATION_MODE: bool = True
+    """A single class to hold all system configuration for easy tuning."""
+    SIMULATION_MODE: bool = True  
     ARDUINO_PORT: str = 'COM9'
     ARDUINO_BAUD: int = 9600
     MODEL_PATH: str = "models/yolov8x.pt"
@@ -25,10 +28,10 @@ class Config:
     })
     
     VEHICLE_WEIGHTS: Dict[int, float] = field(default_factory=lambda: {
-        2: 1.0,
-        3: 0.6,
-        5: 2.5,
-        7: 2.2,
+        2: 1.0,   # Car
+        3: 0.6,   # Motorcycle
+        5: 2.5,   # Bus
+        7: 2.2,   # Truck
     })
 
     YELLOW_TIME: int = 3
@@ -37,15 +40,19 @@ class Config:
     
     DENSITY_WEIGHT: float = 1.0
     WAIT_TIME_WEIGHT: float = 0.5
-    STARVATION_THRESHOLD: int = 120
+    STARVATION_THRESHOLD: int = 120  
     
     PEAK_HOURS: List[Tuple[int, int]] = field(default_factory=lambda: [(7, 10), (16, 19)])
     PEAK_TIMING: Tuple[int, int] = (15, 60)
     NORMAL_TIMING: Tuple[int, int] = (10, 45)
     NIGHT_TIMING: Tuple[int, int] = (8, 30)
 
+    SERVER_ENDPOINT: str = "http://127.0.0.1:5000/log_traffic_data"
+    INTERSECTION_ID: str = "GWL_CROSSING_01" 
+
 @dataclass
 class LaneState:
+    """Tracks comprehensive state for each lane."""
     direction: str
     current_density: float = 0.0
     waiting_time: float = 0.0
@@ -69,6 +76,36 @@ class TrafficController:
         self.should_quit: bool = False
         print("✅ Traffic Controller Initialized.")
         print(f"💡 Current Mode: {'SIMULATION' if cfg.SIMULATION_MODE else 'LIVE'}")
+
+    def log_decision_to_server(self, green_lane: str, green_time: int):
+        """Formats the current state and sends it to the central server."""
+        
+        lane_states = {
+            direction: {
+                "density": round(lane.current_density, 2),
+                "waiting_time": round(lane.waiting_time, 2),
+                "has_ambulance": lane.has_ambulance
+            } for direction, lane in self.lanes.items()
+        }
+        
+        payload = {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "intersection_id": self.cfg.INTERSECTION_ID,
+            "decision": {
+                "green_lane": green_lane,
+                "green_time": green_time
+            },
+            "lane_states": lane_states
+        }
+        try:
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(self.cfg.SERVER_ENDPOINT, data=json.dumps(payload), headers=headers, timeout=5)
+            if response.status_code == 200:
+                print(f"📊 Successfully logged data to server.")
+            else:
+                print(f"⚠️ Server logging failed with status code: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Could not connect to the server: {e}")
 
     def load_model(self):
         try:
@@ -97,6 +134,7 @@ class TrafficController:
         return self.cfg.NORMAL_TIMING
 
     def analyze_frame_and_draw_boxes(self, frame) -> Tuple[float, bool]:
+        """Analyzes frame, draws boxes, and returns score."""
         score = 0.0
         ambulance_detected = False
         if not self.model: return 0.0, False
@@ -115,6 +153,7 @@ class TrafficController:
         return score, ambulance_detected
 
     def get_snapshot_data(self) -> Dict[str, np.ndarray]:
+        """Reads one frame from each camera to make a decision."""
         snapshot_frames = {}
         current_time = time.time()
         for direction, cap in self.caps.items():
@@ -138,6 +177,7 @@ class TrafficController:
         return snapshot_frames
 
     def select_next_lane(self) -> str:
+        """Selects the next green lane based on priority."""
         waiting_lanes = [lane for lane in self.lanes.values() if lane.direction != self.current_green_lane]
         
         if self.pedestrian_request: 
@@ -175,12 +215,13 @@ class TrafficController:
             
     def run(self):
         print("\n🚀 Starting Traffic Control System"); print("=" * 50)
-        snapshot_frames = self.get_snapshot_data()
+        snapshot_frames = self.get_snapshot_data() # Initial snapshot
 
         try:
             while not self.should_quit:
                 current_time = time.time()
 
+                # --- STATE TRANSITION LOGIC ---
                 if current_time >= self.phase_end_time:
                     if self.current_phase == 'GREEN':
                         self.current_phase = 'YELLOW'
@@ -218,8 +259,13 @@ class TrafficController:
                             self.send_to_arduino(f"GREEN:{next_lane_dir},TIME:{green_time}")
                             print(f"🟢 GREEN: {next_lane_dir} for {green_time}s")
 
+                            # *** THIS IS THE NEWLY ADDED LINE ***
+                            self.log_decision_to_server(next_lane_dir, green_time)
+
+                # --- CONTINUOUS DISPLAY LOGIC ---
                 time_left = max(0, int(self.phase_end_time - current_time))
 
+                # Play the green lane video
                 if self.current_phase == 'GREEN':
                     green_cap = self.caps[self.current_green_lane]
                     ret, green_frame = green_cap.read()
@@ -227,30 +273,36 @@ class TrafficController:
                         green_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                         ret, green_frame = green_cap.read()
                     if ret:
-                        self.analyze_frame_and_draw_boxes(green_frame)
+                        score, has_ambulance = self.analyze_frame_and_draw_boxes(green_frame)
+                        self.lanes[self.current_green_lane].current_density = score # Update state for consistency
                         cv2.putText(green_frame, f"{self.current_green_lane} 🟢 GREEN ({time_left}s)", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+                        cv2.putText(green_frame, f"Density: {score:.1f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
                         cv2.imshow(f"Live Feed - {self.current_green_lane}", green_frame)
                 
+                # Show paused frames for all other lanes
                 for direction, frame in snapshot_frames.items():
                     lane = self.lanes[direction]
+                    # Update waiting time for display
                     if direction != self.current_green_lane:
-                         lane.waiting_time = current_time - lane.last_green_time
+                        lane.waiting_time = current_time - lane.last_green_time
 
                     if self.current_phase == 'GREEN' and direction == self.current_green_lane:
-                        continue
+                        continue # Already handled above
 
                     display_frame = frame.copy()
                     status_text, color = "", (0,0,0)
                     if self.current_phase == 'YELLOW' and direction == self.current_green_lane:
                         status_text = f"🟡 YELLOW ({time_left}s)"
                         color = (0, 255, 255)
-                    else:
+                    else: # All other lanes are red
                         status_text = f"🔴 RED ({int(lane.waiting_time)}s)"
                         color = (0, 0, 255)
                     
                     cv2.putText(display_frame, f"{direction} {status_text}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+                    cv2.putText(display_frame, f"Density: {lane.current_density:.1f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
                     cv2.imshow(f"Live Feed - {direction}", display_frame)
 
+                # Keyboard handler
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord('q'):
                     self.should_quit = True
@@ -277,3 +329,4 @@ if __name__ == "__main__":
     config = Config()
     controller = TrafficController(config)
     controller.run()
+
