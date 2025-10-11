@@ -2,53 +2,57 @@ import React, { useState, useEffect } from 'react';
 import MapComponent from './components/MapComponent';
 import RoutePlanner from './components/RoutePlanner';
 import IntersectionPanel from './components/IntersectionPanel';
+import Header from './components/Header'; // <-- Import new component
 import './App.css';
 import L from 'leaflet';
 import { goldenRoutes } from './mockRoutes';
+import ExitFullScreenButton from './components/ExitFullScreenButton';
 
 // --- FINAL INTERSECTION POINTS (MORE SPREAD OUT) ---
 // These points are chosen from earlier and later parts of your saved routes
 // to give a better-paced demonstration.
+
 const smartIntersections = {
-    // Points for Route 0
-    'route0_int1': { 
+    'navrangpura_crossing': { 
         name: "Navrangpura Crossing", 
-        coords: [23.040251, 72.567601] // Point from the first half of Route 0
+        coords: [23.03994, 72.561204],
+        emergencyEnabled: true // This intersection can have emergencies
     },
-    'route0_int2': { 
-        name: "Shahibag Underbridge", 
-        coords: [23.071116, 72.603095] // Point from the second half of Route 0
+    'subhash_bridge_east': { 
+        name: "Subhash Bridge East", 
+        coords: [23.061862, 72.594613],
+        emergencyEnabled: false // This is a normal intersection
     },
-    // Points for Route 1
-    'route1_int1': { 
-        name: "Vadaj Circle", 
-        coords: [23.055353, 72.571548] // Point from the first half of Route 1
+    'usmanpura_garden': { 
+        name: "Usmanpura Garden", 
+        coords: [23.052062, 72.565113],
+        emergencyEnabled: false // This is a normal intersection
     },
-    'route1_int2': { 
+    'civil_hospital_area': { 
         name: "Civil Hospital Area", 
-        coords: [23.067254, 72.600771] // Point from the second half of Route 1
+        coords: [23.067254, 72.600771],
+        emergencyEnabled: true // This intersection can have emergencies
     }
 };
 
 function App() {
+    // --- State Management ---
+    const [viewMode, setViewMode] = useState('dashboard'); // 'dashboard' or 'fullscreen'
     const [routes, setRoutes] = useState([]);
     const [optimalRouteId, setOptimalRouteId] = useState(null);
     const [routesFound, setRoutesFound] = useState(false);
-    const [message, setMessage] = useState('Welcome to the Traff-IQ Demo!');
-    const [panelState, setPanelState] = useState('initial');
+    const [message, setMessage] = useState('Welcome! Find a route to begin.');
     
     const [driveStatus, setDriveStatus] = useState('stopped');
     const [carPosition, setCarPosition] = useState(null);
     const [currentIntersection, setCurrentIntersection] = useState(null);
 
     // NEW: This function just starts the demo and docks the panel
-    const beginDemo = () => {
-        setPanelState('docked');
-        setMessage('Please select an option.');
+    const toggleViewMode = () => {
+        setViewMode(prev => prev === 'dashboard' ? 'fullscreen' : 'dashboard');
     };
 
-    // NEW: This function is now dedicated to showing the routes
-    const displayRoutes = () => {
+    const findRoutes = () => {
         Object.values(smartIntersections).forEach(int => int.visited = false);
         setRoutes(goldenRoutes);
         setRoutesFound(true);
@@ -119,31 +123,46 @@ function App() {
         return () => clearInterval(interval);
     }, [driveStatus, optimalRouteId, routes]);
     
-    return (
-        <div className="App">
-            <RoutePlanner
-                onBeginDemo={beginDemo}
-                onFindRoutes={displayRoutes} // Pass the new function
-                onShowOptimal={showOptimalAndDrive}
-                routesFound={routesFound}
-                message={message}
-                panelState={panelState}
-            />
+   return (
+        // The main container's class will now change dynamically
+        <div className={`app-container ${viewMode}-view`}>
+            {/* The header is only visible in dashboard mode */}
+            <div className="header-container">
+                <Header onToggleView={toggleViewMode} viewMode={viewMode} />
+            </div>
+            
+            <div className="main-content">
+                <div className="sidebar">
+                    <RoutePlanner
+                        onFindRoutes={findRoutes}
+                        onShowOptimal={showOptimalAndDrive}
+                        routesFound={routesFound}
+                        message={message}
+                        viewMode={viewMode} // Pass viewMode to control dragging
+                    />
+                </div>
+
+                <div className="map-wrapper">
+                    <MapComponent 
+                        routes={routes}
+                        optimalRouteId={optimalRouteId}
+                        carPosition={carPosition}
+                        smartIntersections={smartIntersections}
+                    />
+                </div>
+            </div>
+            
             {currentIntersection && 
                 <IntersectionPanel 
                     intersection={currentIntersection} 
                     onSignalGreen={handleSignalGreen} 
                 />
             }
-            <MapComponent 
-                routes={routes}
-                optimalRouteId={optimalRouteId}
-                carPosition={carPosition}
-                smartIntersections={smartIntersections}
-            />
+            {/* NEW: Conditionally render the Exit button */}
+            {viewMode === 'fullscreen' && <ExitFullScreenButton onClick={toggleViewMode} />}
         </div>
     );
 }
 
-// You will need to paste your 'showOptimalAndDrive', 'handleSignalGreen', and 'useEffect' code back in.
+// You will need to paste your existing functions (findRoutes, showOptimalAndDrive, etc.) back into this structure.
 export default App;

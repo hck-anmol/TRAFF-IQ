@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// A helper component for the traffic light display
 const TrafficLight = ({ status }) => (
     <div className="traffic-light">
         <div className={`light-circle red ${status === 'red' ? 'active' : ''}`}></div>
@@ -12,40 +11,57 @@ const TrafficLight = ({ status }) => (
 const IntersectionPanel = ({ intersection, onSignalGreen }) => {
     const [timer, setTimer] = useState(0);
     const [message, setMessage] = useState("Waiting for signal...");
+    const [emergency, setEmergency] = useState({ active: false, type: null });
 
-    // This effect runs once to set up the timer
     useEffect(() => {
-        // Simulate a random wait time at the red light
-        const waitTime = Math.floor(Math.random() * 10) + 5; // Wait for 5-15 seconds
-        setTimer(waitTime);
-    }, [intersection]); // Reruns for each new intersection
+        // Set the normal red light timer for ALL intersections
+        const initialWaitTime = Math.floor(Math.random() * 10) + 8; // Wait 8-18 seconds
+        setTimer(initialWaitTime);
 
-    // This effect handles the countdown
+        
+        // Only schedule an emergency event if the intersection is enabled for it
+        if (intersection.emergencyEnabled) {
+            const emergencyTimeout = setTimeout(() => {
+                const emergencyType = Math.random() > 0.5 ? 'clear_path' : 'hold_traffic';
+                setEmergency({ active: true, type: emergencyType });
+
+                if (emergencyType === 'clear_path') {
+                    setMessage("EMERGENCY VEHICLE DETECTED! CLEARING YOUR PATH...");
+                    setTimeout(() => onSignalGreen(), 2500);
+                } else {
+                    setMessage("EMERGENCY VEHICLE ON CROSS-STREET! HOLDING TRAFFIC...");
+                    setTimer(10); // Hold for an extra 10 seconds
+                }
+            }, Math.random() * 5000 + 4000); // Emergency happens 4-9 seconds after stopping
+
+            return () => clearTimeout(emergencyTimeout);
+        }
+    }, [intersection, onSignalGreen]);
+
+    // This effect for the normal countdown timer remains the same
     useEffect(() => {
-        // If the timer is running, count down
         if (timer > 0) {
-            const countdown = setTimeout(() => {
-                setTimer(prev => prev - 1);
-            }, 1000);
+            const countdown = setTimeout(() => setTimer(prev => prev - 1), 1000);
             return () => clearTimeout(countdown);
-        } 
-        // When the timer hits zero, it's our turn to go
-        else if (timer === 0) {
+        } else if (timer === 0) {
             setMessage("SIGNAL IS GREEN! PROCEEDING...");
-            // Wait 2 seconds on the green light, then tell the car to move
-            const goTimeout = setTimeout(() => {
-                onSignalGreen(); // This tells App.js to resume driving
-            }, 2000);
+            const goTimeout = setTimeout(() => onSignalGreen(), 2000);
             return () => clearTimeout(goTimeout);
         }
     }, [timer, onSignalGreen]);
 
-    // Determine the light status based on the timer
-    const ourSignalStatus = timer > 0 ? 'red' : 'green';
-    const otherSignalStatus = timer > 0 ? 'green' : 'red';
+    // The rest of the component remains the same
+    let ourSignalStatus = 'red';
+    if (emergency.active && emergency.type === 'clear_path') {
+        ourSignalStatus = 'green';
+    } else if (timer === 0) {
+        ourSignalStatus = 'green';
+    }
+    const otherSignalStatus = ourSignalStatus === 'green' ? 'red' : 'green';
 
     return (
-        <div className="intersection-panel">
+        <div className={`intersection-panel ${emergency.active ? 'emergency-active' : ''}`}>
+            {emergency.active && <div className="emergency-alert">⚠️ PRIORITY ALERT ⚠️</div>}
             <h3>Live at: {intersection.name}</h3>
             <div className="display-grid">
                 <div className="light-column">
