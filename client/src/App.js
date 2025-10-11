@@ -6,26 +6,49 @@ import './App.css';
 import L from 'leaflet';
 import { goldenRoutes } from './mockRoutes';
 
+// --- FINAL INTERSECTION POINTS (MORE SPREAD OUT) ---
+// These points are chosen from earlier and later parts of your saved routes
+// to give a better-paced demonstration.
 const smartIntersections = {
-    'route0_int1': { name: "Navrangpura Crossing", coords: [23.03994, 72.561204] },
-    'route0_int2': { name: "Subhash Bridge East", coords: [23.061862, 72.594613] },
-    'route1_int1': { name: "Usmanpura Garden", coords: [23.052062, 72.565113] },
-    'route1_int2': { name: "Dudheshwar Bridge", coords: [23.057584, 72.590991] }
+    // Points for Route 0
+    'route0_int1': { 
+        name: "Navrangpura Crossing", 
+        coords: [23.040251, 72.567601] // Point from the first half of Route 0
+    },
+    'route0_int2': { 
+        name: "Shahibag Underbridge", 
+        coords: [23.071116, 72.603095] // Point from the second half of Route 0
+    },
+    // Points for Route 1
+    'route1_int1': { 
+        name: "Vadaj Circle", 
+        coords: [23.055353, 72.571548] // Point from the first half of Route 1
+    },
+    'route1_int2': { 
+        name: "Civil Hospital Area", 
+        coords: [23.067254, 72.600771] // Point from the second half of Route 1
+    }
 };
 
 function App() {
     const [routes, setRoutes] = useState([]);
     const [optimalRouteId, setOptimalRouteId] = useState(null);
     const [routesFound, setRoutesFound] = useState(false);
-    const [message, setMessage] = useState('Click the button to begin the demo.');
+    const [message, setMessage] = useState('Welcome to the Traff-IQ Demo!');
+    const [panelState, setPanelState] = useState('initial');
     
-    // This is the state that controls the car's movement.
-    const [driveStatus, setDriveStatus] = useState('stopped'); // 'stopped', 'driving', 'stopped_at_signal'
+    const [driveStatus, setDriveStatus] = useState('stopped');
     const [carPosition, setCarPosition] = useState(null);
     const [currentIntersection, setCurrentIntersection] = useState(null);
 
-    const findRoutes = () => {
-        // Reset intersections before finding new routes
+    // NEW: This function just starts the demo and docks the panel
+    const beginDemo = () => {
+        setPanelState('docked');
+        setMessage('Please select an option.');
+    };
+
+    // NEW: This function is now dedicated to showing the routes
+    const displayRoutes = () => {
         Object.values(smartIntersections).forEach(int => int.visited = false);
         setRoutes(goldenRoutes);
         setRoutesFound(true);
@@ -37,7 +60,6 @@ function App() {
         
         let minDensity = Infinity;
         let bestRouteId = null;
-
         const routesWithDensity = routes.map(route => {
             const densityScore = Math.floor(Math.random() * 80) + 10;
             if (densityScore < minDensity) {
@@ -50,16 +72,14 @@ function App() {
         setRoutes(routesWithDensity);
         setOptimalRouteId(bestRouteId);
         setMessage(`Optimal route found! Starting journey...`);
-        setDriveStatus('driving'); // Correctly start the journey
+        setDriveStatus('driving');
     };
 
-    // This function is called by the panel when the light turns green
     const handleSignalGreen = () => {
         setCurrentIntersection(null);
         setDriveStatus('driving');
     };
 
-    // This effect runs the driving simulation
     useEffect(() => {
         if (driveStatus !== 'driving' || !optimalRouteId) return;
 
@@ -81,22 +101,20 @@ function App() {
             const newPosition = optimalRoute.path[currentIndex];
             setCarPosition(newPosition);
 
-            // Proximity Detection Logic
             for (const id in smartIntersections) {
                 const int = smartIntersections[id];
-                // Ensure the car hasn't already visited this intersection
                 if (int.visited) continue;
 
                 const distance = L.latLng(newPosition).distanceTo(L.latLng(int.coords));
                 if (distance < 100) {
-                    int.visited = true; // Mark as visited to prevent re-triggering
+                    int.visited = true;
                     setCurrentIntersection({ id, ...int });
                     setDriveStatus('stopped_at_signal');
                     clearInterval(interval);
                     return;
                 }
             }
-        }, 80);
+        }, 150); // <-- SLOWED DOWN: Changed from 80 to 150 for a slower demo
 
         return () => clearInterval(interval);
     }, [driveStatus, optimalRouteId, routes]);
@@ -104,10 +122,12 @@ function App() {
     return (
         <div className="App">
             <RoutePlanner
-                onFindRoutes={findRoutes}
+                onBeginDemo={beginDemo}
+                onFindRoutes={displayRoutes} // Pass the new function
                 onShowOptimal={showOptimalAndDrive}
                 routesFound={routesFound}
                 message={message}
+                panelState={panelState}
             />
             {currentIntersection && 
                 <IntersectionPanel 
@@ -125,4 +145,5 @@ function App() {
     );
 }
 
+// You will need to paste your 'showOptimalAndDrive', 'handleSignalGreen', and 'useEffect' code back in.
 export default App;
