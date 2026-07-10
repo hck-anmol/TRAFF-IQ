@@ -203,7 +203,7 @@ TRAFF-IQ/
 # 🔮 Future Improvements
 
 - Multi-intersection coordination
-- Predictive traffic analysis using historical data
+- Predictive traffic analysis
 - Edge AI deployment using NVIDIA Jetson
 - Cloud-based monitoring and analytics
 - Automatic incident detection
