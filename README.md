@@ -1,120 +1,221 @@
-# TRAFF-IQ — Intelligent Traffic Management System
-> 🏆 Finalist @ Hackatron, IIIT Gwalior
-TRAFF-IQ is an AI-powered adaptive traffic management system built to work at
-real intersections. Instead of fixed timers, it uses live computer vision to
-actually *see* what's happening on the road — how many vehicles are in each lane,
-whether an ambulance or fire truck is approaching, whether someone just ran a red
-light — and makes decisions in real time based on that.
-The system also streams everything to a live web dashboard so you can monitor
-multiple intersections from one place. And it's not just software — it connects
-to Arduino hardware to physically control the traffic signals on the ground.
-We built this for Hackatron at IIIT Gwalior and made it to the finals.
----
-## What It Does
-**Emergency Vehicle Detection**
-Detects ambulances, fire trucks, and police vehicles in the camera feed and
-immediately clears the signal path for them. Achieved ~90% detection accuracy.
-**Traffic Density Estimation**
-Counts vehicles lane-by-lane and dynamically adjusts how long each signal stays
-green. Busier lanes get more time. Achieved ~85% accuracy.
-**Violation Detection**
-Catches red-light jumpers and general traffic rule violations using computer
-vision. Also ~85% accuracy. Logs every violation with a timestamp.
-**Live Dashboard**
-All intersection data is streamed in real time to a web dashboard via
-Socket.io. You can see signal states, vehicle counts, and violation logs live.
-**Hardware Integration**
-The system talks to an Arduino board over serial to actually switch the physical
-traffic lights. It's not just a simulation.
+# 🚦 TRAFF-IQ — AI-Powered Intelligent Traffic Management System
+
+> 🏆 Finalist | Hackatron, IIIT Gwalior
+
+TRAFF-IQ is an AI-powered adaptive traffic management system designed to optimize traffic flow at real-world intersections. Unlike traditional timer-based traffic signals, it leverages **YOLOv8**, **OpenCV**, and real-time computer vision to monitor traffic density, detect emergency vehicles, and identify traffic violations.
+
+The system dynamically adjusts traffic signal timings based on lane-wise congestion while prioritizing ambulances, fire trucks, and police vehicles to reduce emergency response time. A live monitoring dashboard provides complete visibility into intersection activity, and Arduino integration enables direct control of physical traffic signals.
 
 ---
-## Tech Stack
-|
- Layer 
-|
- Technology 
-|
-|
----
-|
----
-|
-|
- Object Detection 
-|
- Python, YOLOv8, OpenCV 
-|
-|
- Detection Server 
-|
- Flask + Flask-SocketIO 
-|
-|
- Dashboard Backend 
-|
- Node.js + Express + Socket.io 
-|
-|
- Dashboard Frontend 
-|
- React.js 
-|
-|
- Hardware Control 
-|
- Arduino (C++) 
-|
+
+## 📸 Project Preview
+
+<p align="center">
+    <img src="assets/optimalroute.png" width="900">
+</p>
+
 ---
 
-## Setup
-**Prerequisites:** Python 3.8+, Node.js 18+, Arduino IDE (only if using hardware)
+# ✨ Features
 
-### 1. Clone the repo
+### 🚑 Emergency Vehicle Detection
+
+- Detects ambulances, fire trucks, and police vehicles using YOLOv8.
+- Automatically prioritizes emergency vehicles by controlling traffic signals.
+- Achieved approximately **90% detection accuracy**.
+
+<p align="center">
+    <img src="assets/prioritizing.png" width="750">
+</p>
+
+---
+
+### 🚗 Adaptive Traffic Density Estimation
+
+- Counts vehicles lane-wise using computer vision.
+- Dynamically allocates green signal duration based on traffic density.
+- Achieved approximately **85% detection accuracy**.
+
+<p align="center">
+    <img src="assets/trafficdensity.png" width="750">
+</p>
+
+---
+
+### 🚨 Traffic Violation Detection
+
+- Detects red-light violations in real time.
+- Stores every violation with timestamps for monitoring and analytics.
+
+<p align="center">
+    <img src="assets/redlightviolation.png" width="750">
+</p>
+
+---
+
+### 📊 Live Monitoring Dashboard
+
+- Built using **React**, **Node.js**, and **Socket.IO**.
+- Displays:
+  - Live traffic density
+  - Current signal status
+  - Emergency vehicle alerts
+  - Violation logs
+  - System statistics
+
+---
+
+### 🔌 Hardware Integration
+
+- Communicates with an Arduino using Serial Communication.
+- Controls physical traffic signals based on AI predictions.
+- Demonstrates seamless software-hardware integration.
+
+---
+
+# 🏗 System Architecture
+
+```
+Traffic Camera
+      │
+      ▼
+YOLOv8 + OpenCV
+      │
+      ├───────────────┐
+      │               │
+      ▼               ▼
+Traffic Density   Emergency Detection
+      │               │
+      └──────┬────────┘
+             ▼
+      Signal Decision Engine
+             │
+     ┌───────┴────────┐
+     ▼                ▼
+Arduino         React Dashboard
+Traffic Lights   (Socket.IO)
+```
+
+---
+
+# 🛠 Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| AI & Computer Vision | Python, YOLOv8, OpenCV |
+| Detection Server | Flask, Flask-SocketIO |
+| Backend | Node.js, Express.js, Socket.IO |
+| Frontend | React.js |
+| Database | MongoDB |
+| Hardware | Arduino UNO (C++) |
+
+---
+
+# 🚀 Installation
+
+### Clone the Repository
+
 ```bash
 git clone https://github.com/hck-anmol/TRAFF-IQ.git
 cd TRAFF-IQ
+```
 
-2. Set up Python environment
-bash
+### Install Python Dependencies
 
+```bash
 pip install -r requirements.txt
-Key packages: ultralytics, opencv-python, flask, flask-socketio, numpy, torch
+```
 
-3. Run the detection server
-bash
+### Start the Detection Server
 
+```bash
 python app.py
-Flask server starts at http://localhost:5000. Point it to a camera feed or a video file — configure the source in config.py.
+```
 
-4. Run the Node.js dashboard backend
-bash
+Configure the video source and serial port inside `config.py`.
 
+---
+
+### Start Backend
+
+```bash
 cd dashboard
 npm install
 npm start
+```
 
-5. Run the React frontend
-bash
+---
 
+### Start Frontend
+
+```bash
 cd client
 npm install
 npm run dev
-Dashboard opens at http://localhost:5173.
+```
 
-6. Arduino (optional)
-Open /arduino/signal_control.ino in Arduino IDE, upload it to your board, and update the COM port in config.py to match your setup.
+The application runs at:
 
-Project Structure
+```
+http://localhost:5173
+```
 
+---
+
+### Hardware Setup (Optional)
+
+1. Open `arduino/signal_control.ino`
+2. Upload the sketch using Arduino IDE.
+3. Update the COM port in `config.py`.
+
+---
+
+# 📂 Project Structure
+
+```
 TRAFF-IQ/
-├── app.py                  # Main detection script
-├── config.py               # Camera source, COM port, thresholds
+│
+├── client/                 # React Frontend
+├── dashboard/              # Express + Socket.IO Backend
+├── density/                # Traffic Density Module
+├── emergency/              # Emergency Detection Module
+├── web/                    # Dashboard Assets
+├── app.py
+├── config.py
 ├── requirements.txt
-├── models/                 # YOLOv8 weights
-├── detection/              # Vehicle, emergency, violation modules
-├── dashboard/              # Node.js + Socket.io backend
-├── client/                 # React frontend
-└── arduino/                # Arduino signal control sketch
+└── README.md
+```
 
-Demo
-The system was demonstrated live at Hackatron, IIIT Gwalior with a physical Arduino-controlled signal board and a real video feed of traffic footage.
+---
+
+# 🎯 Highlights
+
+- AI-powered adaptive traffic signal control
+- Real-time emergency vehicle prioritization
+- Intelligent traffic density estimation
+- Traffic violation detection
+- Live monitoring dashboard
+- Arduino-based traffic signal automation
+- Finalist at **Hackatron, IIIT Gwalior**
+
+---
+
+# 🔮 Future Improvements
+
+- Multi-intersection coordination
+- Predictive traffic analysis using historical data
+- Edge AI deployment using NVIDIA Jetson
+- Cloud-based monitoring and analytics
+- Automatic incident detection
+
+---
+
+# 👨‍💻 Team
+
+Built during **Hackatron, IIIT Gwalior** by **Team Entropy**.
+
+---
+
+# 📜 License
+
+This project is intended for educational and research purposes.
